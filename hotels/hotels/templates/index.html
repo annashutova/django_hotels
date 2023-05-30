@@ -1,0 +1,48 @@
+{% extends "base_generic.html" %}
+{% block title %} Hotel Searcher {% endblock %}
+
+{% block content %}
+    <section>
+        <div class="hotel-finder">
+            <form action="{% url 'main page' %}" method="POST">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-2 my-1">
+                        <label for="inlineFormInput">Destination</label>
+                    </div>
+                    <div class="col-md-2 my-1">
+                        <label for="dateinput">Check-in</label>
+                    </div>
+                    <div class="col-md-2 my-1">
+                        <label for="dateinput">Check-out</label>
+                    </div>
+                    <div class="col-md-2 my-1">
+                        <label for="RoomCapacity">Capacity</label>
+                    </div>
+                    <div class="w-100"></div>
+                    <div class="col-md-2 my-1">
+                        {{ form.country }}
+                        {{ form.city }}
+                    </div>
+                    <div class="col-md-2 my-1">
+                        {{ form.check_in }}
+                    </div>
+                    <div class="col-md-2 my-1">
+                        {{ form.check_out }}
+                    </div>
+                    <div class="col-md-2 my-1">
+                        {{ form.capacity }}
+                    </div>
+                    <div class="col-auto my-1">
+                        <button type="submit" class="btn btn-primary">Find</button>
+                    </div>
+                </div>
+            </form>
+            {% if errors %}
+                {% for error in errors %}
+                    <p style="color:rgb(255, 2, 2);">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}
