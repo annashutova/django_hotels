@@ -24,5 +24,5 @@ urlpatterns = [
     path('bookings/past/', views.past_bookings, name='past bookings'),
     path('confirmation/', views.booking_confirmation, name='confirm booking'),
     path('fail/', views.failed_booking, name='fail'),
-    path('success/', views.successful_booking, name='success')
+    path('success/', views.successful_booking, name='success'),
 ]

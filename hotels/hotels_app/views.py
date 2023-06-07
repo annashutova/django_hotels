@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status as status_codes
+from rest_framework import viewsets, permissions
 from .models import Amenity, Hotel, Room, Booking, HotelAmenity, Client
 from . import serializers, config, forms
 from django.shortcuts import render, redirect
@@ -27,7 +27,10 @@ def create_viewset(cls_model: models.Model, serializer, permission, order_field)
         "serializer_class": serializer,
         "queryset": cls_model.objects.all().order_by(order_field),
         "permission classes": [permission],
-        "get_queryset": lambda self, *args, **kwargs: cls_model.objects.filter(**query_from_request(self.request, serializer)).order_by(order_field)}
+        "get_queryset": lambda self, *args, **kwargs: cls_model.objects.filter(
+            **query_from_request(self.request, serializer),
+        ).order_by(order_field),
+    },
     )
 
     return CustomViewSet
@@ -37,26 +40,26 @@ AmenityViewSet = create_viewset(
     Amenity,
     serializers.AmenitySerializer,
     permissions.BasePermission,
-    'id'
-    )
+    'id',
+)
 HotelViewSet = create_viewset(
     Hotel,
     serializers.HotelSerializer,
     permissions.BasePermission,
-    'id'
-    )
+    'id',
+)
 RoomViewSet = create_viewset(
     Room,
     serializers.RoomSerializer,
     permissions.BasePermission,
-    'id'
-    )
+    'id',
+)
 BookingViewSet = create_viewset(
     Booking,
     serializers.BookingSerializer,
     permissions.BasePermission,
-    'id'
-    )
+    'id',
+)
 
 
 @decorators.login_required
@@ -76,12 +79,12 @@ def main_page(request):
                 return redirect(reverse('find'))
     else:
         form = forms.HotelFindForm()
-    
+
     return render(
         request,
         config.MAIN_PAGE,
-        context={'form': form, 'errors': form_errors}
-        )
+        context={'form': form, 'errors': form_errors},
+    )
 
 
 @decorators.login_required
@@ -112,7 +115,7 @@ def find_page(request):
         hotel__country=country,
         hotel__city=city,
         capacity=capacity,
-        **room_query
+        **room_query,
     )
 
     all_bookings = {}
@@ -120,10 +123,10 @@ def find_page(request):
     for room in rooms:
         all_bookings[room] = Booking.objects.filter(room=room)
 
-    for room in all_bookings:
+    for room in all_bookings.keys():
         all_bookings[room] = all_bookings[room].exclude(
-            models.Q(check_in__gte=check_out )| models.Q(check_out__lte=check_in)
-            )
+            models.Q(check_in__gte=check_out) | models.Q(check_out__lte=check_in),
+        )
         if not all_bookings[room]:
             hotels.add(room.hotel)
 
@@ -140,15 +143,15 @@ def find_page(request):
             price_max = Room.objects.filter(hotel=hotel).aggregate(models.Max('price'))['price__max']
             price_min = Room.objects.filter(hotel=hotel).aggregate(models.Min('price'))['price__min']
             hotel_data = [hotel, price_min, price_max]
-            final_hotels.append(hotel_data) if hotel_data not in final_hotels else None
-
+            if hotel_data not in final_hotels:
+                final_hotels.append(hotel_data)
 
     amenities = Amenity.objects.all()
-    
+
     context = {
         'amenities': amenities,
         'city': city,
-        'hotels': final_hotels
+        'hotels': final_hotels,
     }
 
     return render(request, config.FIND_PAGE, context=context)
@@ -162,25 +165,25 @@ def rooms_page(request):
     rooms = Room.objects.filter(
         hotel=hotel,
         capacity=request.session['find_hotel'].get('capacity'),
-        **request.session['room_query']
-        )
+        **request.session['room_query'],
+    )
     nights = (datetime.strptime(check_out, '%Y-%m-%d') - datetime.strptime(check_in, '%Y-%m-%d')).days
     all_bookings = {}
     all_rooms = []
     for room in rooms:
         all_bookings[room] = Booking.objects.filter(room=room)
 
-    for room in all_bookings:
+    for room in all_bookings.keys():
         all_bookings[room] = all_bookings[room].exclude(
-            models.Q(check_in__gte=check_out )| models.Q(check_out__lte=check_in)
-            )
+            models.Q(check_in__gte=check_out) | models.Q(check_out__lte=check_in),
+        )
         if not all_bookings[room]:
             all_rooms.append([room, room.price * nights])
 
     context = {
         'rooms': all_rooms,
         'hotel': hotel.name,
-        'nights': f'{nights} night' if nights == 1 else f'{nights} nights'
+        'nights': f'{nights} night' if nights == 1 else f'{nights} nights',
     }
 
     return render(request, config.ROOMS_PAGE, context=context)
@@ -197,13 +200,13 @@ def booking_page(request):
     price = room.price * nights.days
     request.session['room_booking'] = {
         'room_id': str(room.id),
-        'price': str(price)
+        'price': str(price),
     }
     context = {
         'room': room,
         'check_in': check_in.strftime('%d %b, %Y'),
         'check_out': check_out.strftime('%d %b, %Y'),
-        'room_price': price
+        'room_price': price,
     }
     return render(request, config.BOOKING_PAGE, context=context)
 
@@ -215,11 +218,7 @@ def booking_confirmation(request):
         check_out = request.session['find_hotel'].get('check_out')
         room = Room.objects.get(id=request.session['room_booking'].get('room_id'))
         price = request.session['room_booking'].get('price')
-        if Booking.objects.filter(
-            check_in=check_in,
-            check_out=check_out,
-            room=room
-            ).exists():
+        if Booking.objects.filter(check_in=check_in, check_out=check_out, room=room).exists():
             return redirect('fail')
         client = Client.objects.get(user=request.user)
         booking = Booking.objects.create(
@@ -228,7 +227,7 @@ def booking_confirmation(request):
             check_out=check_out,
             room=room,
             status='Booked',
-            price=price
+            price=price,
         )
         response = rq.post(
             url=config.BOOST_URL,
@@ -236,14 +235,13 @@ def booking_confirmation(request):
             json={
                 'recipient': config.BOOST_ACCOUNT,
                 'amount': booking.price,
-                'callback':
-                    {
-                       'redirect': config.STATIC_THANKS,
-                        'url': config.BOOST_CALLBACK_URL.format(id=booking.id),
-                        'headers': config.BOOST_CALLBACK_HEADERS
-                    }
-                }
-            )
+                'callback': {
+                    'redirect': config.STATIC_THANKS,
+                    'url': config.BOOST_CALLBACK_URL.format(id=booking.id),
+                    'headers': config.BOOST_CALLBACK_HEADERS,
+                },
+            },
+        )
         id = response.json().get('id')
         return redirect(config.BOOST_REDIRECT.format(id=id))
     return render(request, config.FAIL_PAGE)
@@ -266,7 +264,7 @@ def create_bookings_view(period: str):
         client = Client.objects.get(user=user)
         params = {
             'client': client,
-            f'check_out__{period}': date.today()
+            f'check_out__{period}': date.today(),
         }
         bookings = Booking.objects.filter(**params).order_by('check_in')
         all_bookings = []
@@ -293,8 +291,8 @@ def account(request):
                 'last_name': user.last_name,
                 'phone': client.phone,
                 'date_of_birth': client.date_of_birth,
-            }
-            )
+            },
+        )
         if form.is_valid():
             b_date = form.cleaned_data.get('date_of_birth')
             phone = form.cleaned_data.get('phone')
@@ -310,18 +308,22 @@ def account(request):
             # validate phone number
             try:
                 validators.validate_phone(phone)
-            except Exception:
+            except Exception as error:
                 form_errors.append(error)
             else:
                 client.phone = phone
             # validate names
             try:
                 validators.validate_name(f_name)
-                validators.validate_name(l_name)
             except Exception as error:
                 form_errors.append(error)
             else:
                 user.first_name = f_name
+            try:
+                validators.validate_name(l_name)
+            except Exception as error:
+                form_errors.append(error)
+            else:
                 user.last_name = l_name
             if not form_errors:
                 client.save()
@@ -333,7 +335,7 @@ def account(request):
                 'last_name': user.last_name,
                 'phone': client.phone,
                 'date_of_birth': client.date_of_birth,
-            }
+            },
         )
     client_data = {
         'Username': user.username,
@@ -341,7 +343,7 @@ def account(request):
         'Last name': user.last_name,
         'Email': user.email,
         'Phone number': client.phone,
-        'Date of birth': client.date_of_birth
+        'Date of birth': client.date_of_birth,
     }
 
     context = {
@@ -384,6 +386,9 @@ def register(request):
             # validate names
             try:
                 validators.validate_name(f_name)
+            except Exception as error:
+                form_errors.append(error.message)
+            try:
                 validators.validate_name(l_name)
             except Exception as error:
                 form_errors.append(error.message)
@@ -401,7 +406,7 @@ def register(request):
                 validators.validate_passwords(password1, password2)
             except Exception as error:
                 form_errors.append(error.message)
-            
+
             if not form_errors:
                 with transaction.atomic():
                     user = auth_models.User.objects.create(
@@ -409,7 +414,7 @@ def register(request):
                         email=email,
                         first_name=f_name,
                         last_name=l_name,
-                        password=hashers.make_password(password1)
+                        password=hashers.make_password(password1),
                     )
                     Client.objects.create(
                         user=user,

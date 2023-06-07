@@ -8,8 +8,8 @@ class DateInputWidget(forms.DateInput):
 
 class RequiredInlineFormSet(forms.models.BaseInlineFormSet):
 
-    def _construct_form(self, i, **kwargs):
-        form = super(RequiredInlineFormSet, self)._construct_form(i, **kwargs)
+    def _construct_form(self, attr, **kwargs):
+        form = super(RequiredInlineFormSet, self)._construct_form(attr, **kwargs)
         form.empty_permitted = False
         return form
 
@@ -18,20 +18,20 @@ class HotelFindForm(forms.Form):
     country = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Enter a country'}),
         max_length=config.CHARS_DEFAULT,
-        required=True
-        )
+        required=True,
+    )
     city = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Enter a city'}),
         max_length=config.CHARS_DEFAULT,
-        required=True
-        )
+        required=True,
+    )
     check_in = forms.DateField(widget=DateInputWidget, required=True)
     check_out = forms.DateField(widget=DateInputWidget, required=True)
     capacity = forms.IntegerField(
         widget=forms.NumberInput(attrs={'placeholder': 'Enter a number of people'}),
         min_value=1,
-        required=True
-        )
+        required=True,
+    )
 
 
 class PersonalData(forms.Form):
@@ -50,6 +50,7 @@ class RegistrationForm(forms.Form):
     date_of_birth = forms.DateField(widget=DateInputWidget)
     password1 = forms.CharField(max_length=config.CHARS_DEFAULT, widget=forms.PasswordInput())
     password2 = forms.CharField(max_length=config.CHARS_DEFAULT, widget=forms.PasswordInput())
+
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=config.CHARS_DEFAULT)

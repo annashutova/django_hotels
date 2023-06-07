@@ -152,13 +152,14 @@ class Client(models.Model):
 
     def __str__(self):
         return self.user.username
-    
-    def clean_phone(number):
+
+    def clean_phone(self):
+        number = self.cleaned_data.get('phone')
         cleaned_value = ''.join(filter(str.isdigit, number))
         if len(cleaned_value) != config.PHONE_LENGTH or not cleaned_value.startswith(('7', '8')):
             raise ValidationError(
                 'Invalid phone number!',
-                params={"number": number}
+                params={"phone": number},
             )
 
     class Meta:
@@ -181,8 +182,8 @@ class Booking(UUIDMixin):
         choices=config.BOOKING_STATUSES,
         default='Booked',
         blank=True,
-        null=False
-        )
+        null=False,
+    )
     price = models.DecimalField(
         verbose_name=_('price'),
         max_digits=config.DECIMAL_MAX_DIGITS,

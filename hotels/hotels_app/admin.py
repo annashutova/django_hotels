@@ -41,7 +41,6 @@ class ClientAdmin(admin.ModelAdmin):
     model = Client
 
 
-
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     model = Booking

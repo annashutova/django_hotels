@@ -1,5 +1,5 @@
 from django.test import TestCase
-from hotels_app import models, config
+from hotels_app import models
 from django.test.client import Client
 from rest_framework import status
 from django.contrib.auth.models import User
@@ -28,6 +28,7 @@ def create_view_tests(url, page_name, template):
             self.assertTemplateUsed(resp, template)
 
     return ViewTests
+
 
 MainPageViewTest = create_view_tests('', 'main page', 'index.html')
 FailPageViewTest = create_view_tests('/fail/', 'fail', 'fail.html')

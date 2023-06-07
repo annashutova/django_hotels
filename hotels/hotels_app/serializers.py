@@ -14,10 +14,11 @@ class HotelSerializer(ModelSerializer):
     class Meta:
         model = Hotel
         fields = (
-            'id', 'company','name', 'star_rating',
+            'id', 'company', 'name', 'star_rating',
             'country', 'state', 'city', 'street', 'building',
-            'latitude', 'longitude'
+            'latitude', 'longitude',
         )
+
 
 class BookingSerializer(ModelSerializer):
 
@@ -62,7 +63,7 @@ class RoomSerializer(ModelSerializer):
             minibar=validated_data['minibar'],
             air_conditioning=validated_data['air_conditioning'],
             bath=validated_data['bath'],
-            desk=validated_data['desk']
+            desk=validated_data['desk'],
         )
 
     class Meta:
@@ -72,5 +73,5 @@ class RoomSerializer(ModelSerializer):
             'capacity', 'double_bed', 'single_bed',
             'safe', 'tv', 'soundproofing', 'minibar',
             'telephone', 'heating', 'wardrobe', 'shower',
-            'air_conditioning', 'bath', 'desk'
+            'air_conditioning', 'bath', 'desk',
         )

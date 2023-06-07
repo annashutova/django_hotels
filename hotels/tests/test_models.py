@@ -20,6 +20,7 @@ def create_simple_model_tests(cls_model, attrs, failing_attrs):
 
     return ModelsTests
 
+
 normal_name = ''.join(sample(ascii_letters, config.CHARS_DEFAULT - 1))
 failing_name = ''.join(sample(ascii_letters, config.CHARS_DEFAULT + 1))
 
@@ -31,7 +32,7 @@ hotel_good_attrs = {
     'street': 'street',
     'building': '23',
     'latitude': 34,
-    'longitude': 34
+    'longitude': 34,
 }
 hotel_fail_attrs = {
     'name': failing_name,
@@ -41,7 +42,7 @@ hotel_fail_attrs = {
     'street': 'street',
     'building': '23',
     'latitude': 34,
-    'longitude': 34
+    'longitude': 34,
 }
 
 
@@ -80,7 +81,7 @@ class RoomModelTests(TestCase):
         self.assertEqual(room.capacity, room_atttrs['capacity'])
         self.assertEqual(room.double_bed, room_atttrs['double_bed'])
         self.assertEqual(room.single_bed, room_atttrs['single_bed'])
-        
+
     def test_fail_attrs(self):
         room_atttrs = {
             'hotel': self.hotel,
@@ -99,17 +100,17 @@ class ClientModelTests(TestCase):
 
     def setUp(self) -> None:
         self.user = User.objects.create_user(
-                username='test',
-                first_name='test',
-                last_name='test',
-                email='test@mail.ru',
-                password='test'
-            )
+            username='test',
+            first_name='test',
+            last_name='test',
+            email='test@mail.ru',
+            password='test',
+        )
 
     def test_good_attrs(self):
         client_attrs = {
             'user': self.user,
-            'phone': '79143249952'
+            'phone': '79143249952',
         }
         client = models.Client.objects.create(**client_attrs)
         self.assertEqual(client.user, self.user)
@@ -118,7 +119,7 @@ class ClientModelTests(TestCase):
     def test_fail_attrs(self):
         client_attrs = {
             'user': self.user,
-            'phone': '991432566560909'
+            'phone': '991432566560909',
         }
         with self.assertRaises(ValidationError):
             client = models.Client(**client_attrs)
@@ -139,15 +140,15 @@ class BookingModelTests(TestCase):
             longitude=54,
         )
         self.user = User.objects.create_user(
-                username='test',
-                first_name='test',
-                last_name='test',
-                email='test@mail.ru',
-                password='test'
-            )
+            username='test',
+            first_name='test',
+            last_name='test',
+            email='test@mail.ru',
+            password='test',
+        )
         self.client = models.Client.objects.create(
             user=self.user,
-            phone='79143249952'
+            phone='79143249952',
         )
         self.room = models.Room.objects.create(
             hotel=self.hotel,
@@ -166,7 +167,7 @@ class BookingModelTests(TestCase):
             'check_in': date.today() + timedelta(days=1),
             'check_out': date.today() + timedelta(days=2),
             'status': 'Booked',
-            'price': 1000
+            'price': 1000,
         }
         booking = models.Booking.objects.create(**booking_attrs)
         self.assertEqual(booking.check_in, booking_attrs['check_in'])
@@ -183,7 +184,7 @@ class BookingModelTests(TestCase):
             'check_in': date.today() + timedelta(days=2),
             'check_out': date.today() + timedelta(days=1),
             'status': 'Booked',
-            'price': 1000
+            'price': 1000,
         }
         with self.assertRaises(ValidationError):
             booking = models.Booking(**booking_attrs)
