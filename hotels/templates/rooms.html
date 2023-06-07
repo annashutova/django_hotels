@@ -1,0 +1,75 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    Rooms in hotel {{hotel}}
+{% endblock %}
+
+{% block content %}
+<ul class="list-group">
+    {% for room in rooms %}
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col-sm-3">
+                    <h1></h1>
+                </div>
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h4>{{room.0.type}} : {{room.0.code}}</h4>
+                            <p>Capacity: {{room.0.capacity}}</p>
+                            <p>Price for {{nights}}: {{room.1}}</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <h5 style="color:rgb(0, 111, 111);">Bed Types</h5>
+                            {% if room.0.double_bed %}
+                                <p>Double bed</p>
+                            {% endif %}
+                            {% if room.0.single_bed %}
+                                <p>Single bed</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <hr>
+                    <h5 style="color:rgb(0, 111, 111);">Facilities in the room</h5>
+                    {% if room.0.safe %}
+                        <p>Safe</p>
+                    {% endif %}
+                    {% if room.0.tv %}
+                        <p>TV</p>
+                    {% endif %}
+                    {% if room.0.soundproofing %}
+                        <p>Soundproofing</p>
+                    {% endif %}
+                    {% if room.0.telephone %}
+                        <p>Telephone</p>
+                    {% endif %}
+                    {% if room.0.heating %}
+                        <p>Heating</p>
+                    {% endif %}
+                    {% if room.0.wardrobe %}
+                        <p>Wardrobe</p>
+                    {% endif %}
+                    {% if room.0.shower %}
+                        <p>Shower</p>
+                    {% endif %}
+                    {% if room.0.minibar %}
+                        <p>Minibar</p>
+                    {% endif %}
+                    {% if room.0.air_conditioning %}
+                        <p>Air conditioning</p>
+                    {% endif %}
+                    {% if room.0.bath %}
+                        <p>Bath</p>
+                    {% endif %}
+                    {% if room.0.desk %}
+                        <p>Desk</p>
+                    {% endif %}
+                </div>
+                <div class="col-sm-1">
+                    <a class="btn btn-primary" href="{% url 'book'%}?id={{room.0.id}}" role="button">Book</a>
+                </div>
+            </div>
+        </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

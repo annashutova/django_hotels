@@ -1,0 +1,14 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    Success
+{% endblock %}
+
+{% block content %}
+    <ul class="list-group">
+        <li class="list-group-item">
+            <h1>Thank you for the booking! See you soon!</h1>
+            <p><a href="{% url 'main page'%}" class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Book another room</a></p>
+        </li>
+    </ul>
+{% endblock %}

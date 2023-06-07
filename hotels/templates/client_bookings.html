@@ -1,0 +1,42 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    Your bookings
+{% endblock %}
+
+{% block content %}
+    {% if bookings %}
+        <ul class="list-group">
+            {% for booking in bookings %}
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h4>{{booking.0.room.hotel.country}}, {{booking.0.room.hotel.city}}</h4>
+                            <h4>{{booking.0.room.hotel.name}}</h4>
+                            <h4>Type: {{booking.0.room.type}}</h4>
+                        </div>
+                        <div class="vr"></div>
+                        <div class="col-sm-3">
+                            <h2 style="color:rgb(0, 111, 111);">Stay</h2>
+                            <p>From {{booking.1}} To {{booking.2}}</p>
+                        </div>
+                        <div class="vr"></div>
+                        <div class="col-sm-3">
+                            <h2 style="color:rgb(0, 111, 111);">Price</h2>
+                            <p>{{booking.0.price}}</p>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <ul class="list-group">
+            <li class="list-group-item">
+                <h2>You have no bookings yet.</h2>
+            </li>
+            <li class="list-group-item">
+                <p><a href="{% url 'main page'%}" class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Start searching</a></p>
+            </li>
+        </ul>
+    {% endif %}
+{% endblock %}

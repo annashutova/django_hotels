@@ -5,18 +5,7 @@ from . import config
 from django.conf.global_settings import AUTH_USER_MODEL
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.validators import MaxValueValidator, MinValueValidator
-from phonenumber_field.modelfields import PhoneNumberField
 from datetime import timedelta, date
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
-from django.conf import settings
-
-# This code is triggered whenever a new user has been created and saved to the database
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
 
 
 class UUIDMixin(models.Model):
@@ -45,20 +34,9 @@ class Hotel(UUIDMixin):
     name = models.CharField(_('name'), max_length=config.CHARS_DEFAULT)
     star_rating = models.PositiveSmallIntegerField(
         verbose_name=_('star rating'),
-        blank=True,
-        null=True,
+        default=0,
         validators=[MaxValueValidator(5)],
     )
-    rooms_quantity = models.PositiveIntegerField(_('rooms quantity')) # удалить
-    phone = PhoneNumberField(
-        verbose_name=_('phone'),
-        max_length=config.PHONE_LENGTH,
-        blank=True,
-        null=True,
-    )
-    check_in = models.CharField(_('check in'), max_length=config.CHECK_IN_OUT_LEN)
-    check_out = models.CharField(_('check out'), max_length=config.CHECK_IN_OUT_LEN)
-    description = models.TextField(_('description'), blank=True, null=True)
     country = models.CharField(_('country'), max_length=config.CHARS_DEFAULT)
     state = models.CharField(_('state'), max_length=config.CHARS_DEFAULT, blank=True, null=True)
     city = models.CharField(_('city'), max_length=config.CHARS_DEFAULT)
@@ -84,7 +62,6 @@ class Hotel(UUIDMixin):
                 check=models.Q(star_rating__gte=0) & models.Q(star_rating__lte=5),
                 name='star_rate_check',
             ),
-            models.CheckConstraint(check=models.Q(rooms_quantity__gt=0), name='rooms_quan_check'),
             models.CheckConstraint(
                 check=models.Q(latitude__gte=-config.LATITUDE) & models.Q(latitude__lte=config.LATITUDE),
                 name='latitude_check',
@@ -103,17 +80,8 @@ class Hotel(UUIDMixin):
 class HotelAmenity(UUIDMixin):
     hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE)
     amenity = models.ForeignKey(Amenity, on_delete=models.CASCADE)
-    price = models.DecimalField(
-        verbose_name=_('price'),
-        max_digits=config.DECIMAL_MAX_DIGITS,
-        decimal_places=config.DECIMAL_PLACES,
-        validators=[MinValueValidator(0)],
-    )
 
     class Meta:
-        constraints = [
-            models.CheckConstraint(check=models.Q(price__gte=0), name='amenity_price_check'),
-        ]
         db_table = 'hotel_amenity'
         unique_together = (('hotel', 'amenity'),)
         verbose_name = _('hotel amenity')
@@ -133,8 +101,6 @@ class Room(UUIDMixin):
     capacity = models.PositiveSmallIntegerField(_('capacity'))
     double_bed = models.PositiveSmallIntegerField(_('double bed'))
     single_bed = models.PositiveSmallIntegerField(_('single bed'))
-    area = models.PositiveSmallIntegerField(_('area'), blank=True, null=True)
-    description = models.TextField(_('description'), blank=True, null=True)
     safe = models.BooleanField(_('safe'), default=False, blank=True, null=True)
     tv = models.BooleanField(_('tv'), default=False, blank=True, null=True)
     soundproofing = models.BooleanField(_('soundproofing'), default=False, blank=True, null=True)
@@ -164,7 +130,6 @@ class Room(UUIDMixin):
             models.CheckConstraint(check=models.Q(capacity__gt=0), name='capacity_check'),
             models.CheckConstraint(check=models.Q(double_bed__gte=0), name='double_bed_check'),
             models.CheckConstraint(check=models.Q(single_bed__gte=0), name='single_bed_check'),
-            models.CheckConstraint(check=models.Q(area__gt=0), name='area_check'),
         ]
         db_table = 'room'
         unique_together = (('hotel', 'code'),)
@@ -182,16 +147,19 @@ def validate_birth(date_of_birth: date):
 
 class Client(models.Model):
     user = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
-    phone = PhoneNumberField(verbose_name=_('phone'), max_length=config.PHONE_LENGTH)
-    citizenship = models.CharField(
-        verbose_name=_('citizenship'),
-        max_length=config.CHARS_DEFAULT,
-        choices=config.CITIZENSHIP_CHOICES,
-    )
+    phone = models.CharField(verbose_name=_('phone'), max_length=config.PHONE_LENGTH)
     date_of_birth = models.DateField(blank=True, null=True, validators=[validate_birth])
 
     def __str__(self):
         return self.user.username
+    
+    def clean_phone(number):
+        cleaned_value = ''.join(filter(str.isdigit, number))
+        if len(cleaned_value) != config.PHONE_LENGTH or not cleaned_value.startswith(('7', '8')):
+            raise ValidationError(
+                'Invalid phone number!',
+                params={"number": number}
+            )
 
     class Meta:
         db_table = 'client'
@@ -199,36 +167,29 @@ class Client(models.Model):
         verbose_name_plural = _('clients')
 
 
-class Reservation(UUIDMixin):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    payment = models.CharField(
-        verbose_name=_('payment'),
-        max_length=config.CHARS_DEFAULT,
-        choices=config.PAYMENT_CHOICES,
-        blank=True,
-        null=True,
-    )
-    created = models.DateTimeField(_('created'), auto_now_add=True, editable=False)
-    modified = models.DateTimeField(_('modified'), auto_now=True)
-
-    def __str__(self):
-        return f'{self.client}: {self.id}'
-
-    class Meta:
-        db_table = 'reservation'
-        verbose_name = _('reservation')
-        verbose_name_plural = _('reservations')
-
-
 def get_checkout_date():
     return date.today() + timedelta(1.0)
 
 
 class Booking(UUIDMixin):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
     check_in = models.DateField(_('check_in'), default=date.today)
     check_out = models.DateField(_('check_out'), default=get_checkout_date)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=config.STATUS_LENGTH,
+        choices=config.BOOKING_STATUSES,
+        default='Booked',
+        blank=True,
+        null=False
+        )
+    price = models.DecimalField(
+        verbose_name=_('price'),
+        max_digits=config.DECIMAL_MAX_DIGITS,
+        decimal_places=config.DECIMAL_PLACES,
+        validators=[MinValueValidator(1)],
+    )
+    created = models.DateTimeField(_('created'), auto_now_add=True, editable=False)
 
     class Meta:
         unique_together = (('check_in', 'check_out', 'room'),)
@@ -264,32 +225,3 @@ class Booking(UUIDMixin):
 
     def __str__(self):
         return f'{self.check_in}-{self.check_out}, {self.room}'
-
-
-class Item(UUIDMixin):
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE)
-    hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE)
-    amenity = models.ForeignKey(Amenity, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(_('quantity'), blank=True, null=True)
-
-    class Meta:
-        constraints = [
-            models.CheckConstraint(check=models.Q(quantity__gt=0), name='item_quantity_check'),
-        ]
-        db_table = 'item'
-        unique_together = (('reservation', 'hotel', 'amenity'),)
-        verbose_name = _('item')
-        verbose_name_plural = _('items')
-
-    def clean(self):
-        super().clean()
-        try:
-            HotelAmenity.objects.get(hotel=self.hotel.id, amenity=self.amenity.id)
-        except ObjectDoesNotExist:
-            raise ValidationError(
-                {'amenity': _('Hotel does not provide this amenity.')},
-                params={'amenity': self.amenity},
-            )
-
-    def __str__(self):
-        return f'{self.hotel}, {self.reservation}'

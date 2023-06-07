@@ -1,8 +1,5 @@
-from typing import Any, Dict
 from django import forms
 from . import config
-from datetime import date
-from .models import Amenity
 
 
 class DateInputWidget(forms.DateInput):
@@ -15,13 +12,6 @@ class RequiredInlineFormSet(forms.models.BaseInlineFormSet):
         form = super(RequiredInlineFormSet, self)._construct_form(i, **kwargs)
         form.empty_permitted = False
         return form
-
-
-class HotelFilterForm(forms.Form):
-    amenity_choices = ((amenity, amenity) for amenity in Amenity.objects.all())
-
-    amenity = forms.MultipleChoiceField(choices=amenity_choices)
-    star_rating = forms.MultipleChoiceField(choices=config.RATING_CHOICES)
 
 
 class HotelFindForm(forms.Form):
@@ -43,16 +33,24 @@ class HotelFindForm(forms.Form):
         required=True
         )
 
-    # def clean_check_in(self):
-    #     check_in = self.cleaned_data.get('check_in')
-    #     if check_in < date.today():
-    #         raise forms.ValidationError('Check in date cannot be in the past.')
-    #     return check_in
 
-    # def clean(self) -> Dict[str, Any]:
-    #     cleaned_data = super().clean()
-    #     check_in = cleaned_data.get('check_in')
-    #     check_out = cleaned_data.get('check_out')
-    #     if check_in and check_out:
-    #         if check_out <= check_in:
-    #             raise forms.ValidationError('Check out date cannot be before check in date.')
+class PersonalData(forms.Form):
+    first_name = forms.CharField(max_length=config.CHARS_DEFAULT)
+    last_name = forms.CharField(max_length=config.CHARS_DEFAULT)
+    phone = forms.CharField(max_length=config.PHONE_LENGTH)
+    date_of_birth = forms.DateField(widget=DateInputWidget)
+
+
+class RegistrationForm(forms.Form):
+    username = forms.CharField(max_length=config.CHARS_DEFAULT)
+    email = forms.CharField(max_length=config.CHARS_DEFAULT)
+    first_name = forms.CharField(max_length=config.CHARS_DEFAULT)
+    last_name = forms.CharField(max_length=config.CHARS_DEFAULT)
+    phone = forms.CharField(max_length=config.PHONE_LENGTH)
+    date_of_birth = forms.DateField(widget=DateInputWidget)
+    password1 = forms.CharField(max_length=config.CHARS_DEFAULT, widget=forms.PasswordInput())
+    password2 = forms.CharField(max_length=config.CHARS_DEFAULT, widget=forms.PasswordInput())
+
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=config.CHARS_DEFAULT)
+    password = forms.CharField(max_length=config.CHARS_DEFAULT, widget=forms.PasswordInput())

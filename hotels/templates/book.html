@@ -1,0 +1,27 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    Confirm booking
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-4"></div>
+        <div class="col-lg-4">
+            <h1 style="color:rgb(0, 111, 111);">You want to book</h1>
+            <hr>
+            <h3>{{room.type}}, {{room.code}}</h3>
+            <h3>In {{room.hotel.name}}: {{room.hotel.country}}, {{room.hotel.city}}</h3>
+            <hr>
+            <h4>Duration: {{check_in}} - {{check_out}}</h4>
+            <hr>
+            <h4>Price: {{room_price}}</h4>
+            <hr>
+            <form action="{% url 'confirm booking' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Confirm</button>
+            </form>
+        </div>
+        <div class="col-lg-4"></div>
+    </div>
+{% endblock %}

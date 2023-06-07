@@ -1,0 +1,14 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    Fail
+{% endblock %}
+
+{% block content %}
+    <ul class="list-group">
+        <li class="list-group-item">
+            <h1>Sorry this room has been already booked. Choose another one.</h1>
+            <p><a href="{% url 'find'%}" class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Book another room</a></p>
+        </li>
+    </ul>
+{% endblock %}

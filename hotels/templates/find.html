@@ -1,0 +1,405 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    Hotels in {{city}}
+{% endblock %}
+
+{% block content %}
+<style>
+    body{
+        justify-content: center;
+    }
+    .hotel-container{
+        margin-top: 20px;
+        border: 2px solid teal;
+        width: 80vh;
+        border-radius: 8px;
+    }
+    .hotel-container:hover{
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .hotel-header{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    .hotel-header .header-image{
+        width: 30%;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        column-count: 1;
+    }
+    .hotel-header .header-image .star{
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+    }
+    .hotel-header .header-image .star img{
+        width: 10%;
+    }
+    .hotel-header .header-image img{
+        width: 100%;
+    }
+    .hotel-header .header-content{
+        width: 70%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+    }
+    .hotel-header .header-content .content-rows{
+        display: flex;
+        flex-direction: column;
+    }
+    .hotel-header .header-content p{
+        color: #333;
+    }
+    .hotel-content{
+        display: flex;
+        flex-direction: row;
+        padding: 10px;
+    }
+    .hotel-content .price{
+        width: 30%;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+    .hotel-content .price .from{
+        font-size: 18px;
+        color: #333;
+        width: 49%;
+        display: flex;
+    justify-content: space-around;
+
+    }
+    .hotel-content .price .from p{
+        float: right;
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+    .hotel-content .price .to{
+        font-size: 18px;
+        color: #333;
+        width: 49%;
+        display: flex;
+    justify-content: space-around;
+    }
+    .hotel-content .price .to p{
+        float: left;
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+    .hotel-content .price .separator{
+        width: 2%;
+        background-color: #333;
+        width: 10px;
+        height: 1px;
+        margin-left: 3px;
+        margin-right: 3px;
+    }
+    .hotel-content .hotel-addres{
+        width: 49%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .hotel-content .hotel-addres p{
+        color: #333;
+        font-size: 16px;
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+    .hotel-content .btn-container{
+        width: 21%;
+    }
+    .hotel-content .btn-container .btn{
+        width: 100%;
+        border: 2px solid rgb(39, 167, 167);
+        padding: 10px;
+        background-color: rgb(39, 167, 167);
+        float: right;
+        color: #fff;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+    .hotel-content .btn-container .btn:hover{
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .star-filter {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    }
+    .star-filter img{
+        width: 10%;
+    }
+    .form-check {
+    position: relative;
+    display: block;
+    }
+    .btn-up {
+    position: fixed;
+    background-color: rgb(39, 167, 167);
+    right: 20px;
+    bottom: 0;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 50px;
+    }
+
+    .btn-up::before {
+    content: "";
+    width: 40px;
+    height: 40px;
+    background: transparent no-repeat center center;
+    background-size: 100% 100%;
+    background-image: url("../static/images/arrow.svg");
+    }
+
+    .btn-up_hide {
+    display: none;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+    .btn-up:hover {
+        background-color: rgb(0, 111, 111);
+    }
+    }
+</style>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="well">
+                    <h4 style="color:rgb(0, 111, 111);">Facilities and Services</h4>
+                    <form>
+                        <h5>In the hotel</h5>
+                        {% for amenity in amenities %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="{{ amenity.title }}" value="true" id="flexCheckDefault">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                {{ amenity.title }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                        <hr>
+                        <h5>In the room</h5>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="safe" value="true" id="safe">
+                            <label class="form-check-label" for="safe">
+                            Safe
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="tv" value="true" id="tv">
+                            <label class="form-check-label" for="tv">
+                            TV
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="soundproofing" value="true" id="soundproofing">
+                            <label class="form-check-label" for="soundproofing">
+                            Soundproofing
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="telephone" value="true" id="telephone">
+                            <label class="form-check-label" for="telephone">
+                            Telephone
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="heating" value="true" id="heating">
+                            <label class="form-check-label" for="heating">
+                            Heating
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="wardrobe" value="true" id="wardrobe">
+                            <label class="form-check-label" for="wardrobe">
+                            Wardrobe
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="shower" value="true" id="shower">
+                            <label class="form-check-label" for="shower">
+                            Shower
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="minibar" value="true" id="minibar">
+                            <label class="form-check-label" for="minibar">
+                            Minibar
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="air_conditioning" value="true" id="air_conditioning">
+                            <label class="form-check-label" for="air_conditioning">
+                            Air conditioning
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="bath" value="true" id="bath">
+                            <label class="form-check-label" for="bath">
+                            Bath
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="desk" value="true" id="desk">
+                            <label class="form-check-label" for="desk">
+                            Desk
+                            </label>
+                        </div>
+                        <hr>
+                        <h5>Star Rating</h5>
+                        <div class="form-check-stars">
+                            <label>
+                                <div class="star-filter">
+                                    <input type="checkbox" name="5" value="true">
+                                    <img src="../static/images/star.png" alt="">
+                                    <img src="../static/images/star.png" alt="">
+                                    <img src="../static/images/star.png" alt="">
+                                    <img src="../static/images/star.png" alt="">
+                                    <img src="../static/images/star.png" alt="">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="form-check-stars">
+                            <label>
+                                <div class="star-filter">
+                                    <input type="checkbox" name="4" value="true">
+                                    <img src="../static/images/star.png" alt="">
+                                    <img src="../static/images/star.png" alt="">
+                                    <img src="../static/images/star.png" alt="">
+                                    <img src="../static/images/star.png" alt="">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="form-check-stars">
+                            <label>
+                                <div class="star-filter">
+                                    <input type="checkbox" name="3" value="true">
+                                    <img src="../static/images/star.png" alt="">
+                                    <img src="../static/images/star.png" alt="">
+                                    <img src="../static/images/star.png" alt="">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="form-check-stars">
+                            <label>
+                                <div class="star-filter">
+                                    <input type="checkbox" name="2" value="true">
+                                    <img src="../static/images/star.png" alt="">
+                                    <img src="../static/images/star.png" alt="">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="form-check-stars">
+                            <label>
+                                <div class="star-filter">
+                                    <input type="checkbox" name="1" value="true">
+                                    <img src="../static/images/star.png" alt="">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="form-check-stars">
+                            <label>
+                                <div class="star-filter">
+                                    <input type="checkbox" name="0" value="true">
+                                    <h7>Without stars</h7>
+                                </div>
+                            </label>
+                        </div>   
+                        <hr>
+                        <button type="submit" class="btn btn-primary">Find</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-9">
+                {% if hotels %}
+                    {% for hotel in hotels %}
+                        <div class="hotel-container">
+                            <div class="hotel-header">
+                                <div class="header-image">
+                                    <img src="../static/images/hotel.jpg" alt="">
+                                    <div class="star">
+                                        {% with ''|center:hotel.0.star_rating as range %}
+                                        {% for _ in range %}
+                                            <img src="../static/images/star.png" alt="">
+                                        {% endfor %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                                <div class="header-content">
+                                    <div class="content-rows">
+                                        <p>{{hotel.0.name}}</p>
+                                        {% if hotel.0.company %}
+                                        <p>{{hotel.0.company}}</p>
+                                        {% endif %}
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <div class="hotel-content">
+                                <div class="price">
+                                    <div class="from">
+                                        <p>{{hotel.1}}</p>
+                                    </div>
+                                    <div class="separator"></div>
+                                    <div class="to">
+                                        {{hotel.2}}
+                                    </div>
+                                </div>
+                                <div class="hotel-addres">
+                                    <p>
+                                        {{hotel.0.country}}, {{hotel.0.city}}, {{hotel.0.street}}, {{hotel.0.building}}
+                                    </p>
+                                </div>
+                                <div class="btn-container">
+                                    <a class="btn" href="{% url 'rooms page'%}?id={{hotel.0.id}}">Rooms</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <h3>No hotels were found in {{city}}.</h3>
+                {% endif %}
+            </div>
+        </div>
+        <div class="btn-up btn-up_hide"></div>
+    </div>
+    <script>
+        const btnUp = {
+        el: document.querySelector('.btn-up'),
+        show() {
+            this.el.classList.remove('btn-up_hide');
+        },
+        hide() {
+            this.el.classList.add('btn-up_hide');
+        },
+        addEventListener() {
+            window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY || document.documentElement.scrollTop;
+            scrollY > 400 ? this.show() : this.hide();
+            });
+            document.querySelector('.btn-up').onclick = () => {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });
+            }
+        }
+        }
+
+        btnUp.addEventListener();
+    </script>
+{% endblock %}

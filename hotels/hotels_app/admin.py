@@ -1,21 +1,9 @@
 from django.contrib import admin
-from .models import Hotel, Amenity, Room, HotelAmenity, Client, Reservation, Booking, Item
-from .forms import RequiredInlineFormSet
+from .models import Hotel, Amenity, Room, HotelAmenity, Client, Booking
 
 
 class HotelAmenityInline(admin.TabularInline):
     model = HotelAmenity
-    extra = 1
-
-
-class BookingInline(admin.TabularInline):
-    model = Booking
-    extra = 1
-    formset = RequiredInlineFormSet
-
-
-class ItemInline(admin.TabularInline):
-    model = Item
     extra = 1
 
 
@@ -53,15 +41,6 @@ class ClientAdmin(admin.ModelAdmin):
     model = Client
 
 
-@admin.register(Reservation)
-class ReservationAdmin(admin.ModelAdmin):
-    model = Reservation
-    inlines = (BookingInline, ItemInline)
-    list_filter = (
-        'client',
-        'created',
-    )
-
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
@@ -70,14 +49,4 @@ class BookingAdmin(admin.ModelAdmin):
         'check_in',
         'check_out',
         'room',
-    )
-
-
-@admin.register(Item)
-class ItemAdmin(admin.ModelAdmin):
-    model = Item
-    list_filter = (
-        'reservation',
-        'hotel',
-        'amenity',
     )

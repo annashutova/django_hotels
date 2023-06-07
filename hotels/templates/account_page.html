@@ -1,0 +1,60 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    Account
+{% endblock %}
+
+{% block content %}
+    {% if client_data %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-7">
+                <h4>Profile Data</h4>
+                <hr>
+                <form>
+                    {% for key, value in client_data.items %}
+                    <div class="form-group row">
+                    <label for="staticField" class="col-sm-3 col-form-label">{{key}}</label>
+                    <div class="col-sm-9">
+                        <input type="text" readonly class="form-control-plaintext" id="staticField" value="{{value}}">
+                    </div>
+                    </div>
+                    {% endfor %}
+                </form>
+            </div>
+            <div class="col-lg-5">
+                <h4>Change your profile data</h4>
+                <hr>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="inputGroup-sizing-default">First name</span>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Last name</span>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Phone number</span>
+                        {{ form.phone }}
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Date of birth</span>
+                        {{ form.date_of_birth }}
+                    </div>
+                    <hr>
+                    <button type="submit" class="btn btn-primary">Change</button>
+                </form>
+                {% if errors %}
+                    {% for error in errors %}
+                        <p style="color:rgb(255, 2, 2);">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+        <h3>There is no client data</h3>
+    {% endif %}
+{% endblock %}
